@@ -173,8 +173,12 @@ const QString &ccApplicationBase::translationPath() const
 void ccApplicationBase::setupPaths()
 {
 	QDir  appDir = QCoreApplication::applicationDirPath();
+//        m_PluginPaths << "/home/thomas/Projects/CloudCompare/cmake-build-debug/plugins/private/LAS-IO";
+//        m_PluginPaths << "/home/thomas/Projects/CloudCompare/cmake-build-debug/plugins/private/qPDALIO2";
+//  m_PluginPaths << "/home/thomas/Projects/CloudCompare/cmake-build-debug/plugins/private/qPDALIO";
+        m_PluginPaths << "/home/thomas/Projects/CloudCompare/cmake-build-debug/plugins/core/IO/qPDALIO";
 
-	// Set up our shader and plugin paths
+        // Set up our shader and plugin paths
 #if defined(Q_OS_MAC)
 	QDir  bundleDir = appDir;
 
