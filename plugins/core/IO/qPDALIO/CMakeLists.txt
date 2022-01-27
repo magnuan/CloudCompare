@@ -3,7 +3,7 @@ option( PLUGIN_IO_QPDAL "Install qPDALIO plugin to read & write LAS files" OFF )
 if( PLUGIN_IO_QPDAL )
 	project( QPDAL_IO_PLUGIN )
  
-	find_package( PDAL 2.0 REQUIRED CONFIG )
+	find_package( PDAL 2.3 REQUIRED CONFIG )
 
 	AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 	
