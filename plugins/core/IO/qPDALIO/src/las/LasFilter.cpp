@@ -18,6 +18,7 @@
 #include "LasFilter.h"
 #include "CCToPdal.h"
 #include "PdalToCC.h"
+#include "Compatibility.h"
 
 // qCC_db
 #include "ccHObjectCaster.h"
@@ -263,7 +264,7 @@ CC_FILE_ERROR LasFilter::loadFile(const QString &filename, ccHObject &container,
 
   pdal::PointLayoutPtr layout(pointTable.layout());
   LasField::Vector lasScalarFields =
-      LasField::LasFieldsOfLayout(*layout, lasHeader.has14PointFormat());
+      LasField::LasFieldsOfLayout(*layout, Has14PointFormat(lasHeader));
 
   std::vector<SavedExtraField> savedExtraFields;
   for (const LasField &field : lasScalarFields) {
@@ -291,7 +292,7 @@ CC_FILE_ERROR LasFilter::loadFile(const QString &filename, ccHObject &container,
 
   PdalToCc converter;
   converter.setScalarFieldsToLoad(std::move(lasScalarFields));
-  converter.setIs14Format(lasHeader.has14PointFormat());
+  converter.setIs14Format(Has14PointFormat(lasHeader));
   converter.setLoadColors(openDialog.loadColors());
   converter.setDetermineShiftCallback(determineLasShiftCallback);
   converter.setInput(lasReader);
