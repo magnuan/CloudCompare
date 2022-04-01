@@ -174,7 +174,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								bool doInterpolateEmptyCells,
 								double maxEdgeLength,
 								ProjectionType sfInterpolation/*=INVALID_PROJECTION_TYPE*/,
-								ccProgressDialog* progressDialog/*=nullptr*/)
+								ccProgressDialog* progressDialog/*=nullptr*/,
+								int zStdDevSfIndex/*=-1*/)
 {
 	if (!cloud)
 	{
@@ -385,18 +386,64 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				}
 				//Extract min/max value
 				aCell.minHeight = cellPointHeight.front();
-				aCell.maxHeight = cellPointHeight.back();
-				//Calculate average value
-				aCell.avgHeight = std::accumulate(cellPointHeight.begin(), cellPointHeightEnd, 0.0) / aCell.nbPoints;
-				//Calculate std dev
-				double cellVariance = 0.0;
-				for (double h : cellPointHeight)
+				aCell.maxHeight = cellPointHeight[aCell.nbPoints-1];
+		
+				
+				if (projectionType != PROJ_INVERSE_VAR_VALUE) 
 				{
-					cellVariance += h*h;
+					//Calculate normal average value
+					//Calculate average value
+					aCell.avgHeight = std::accumulate(cellPointHeight.begin(), cellPointHeightEnd, 0.0) / aCell.nbPoints;
+					//Calculate std dev
+					double cellVariance = 0.0;
+					for (unsigned n = 0; n < aCell.nbPoints ;n++)
+					{
+						auto devFromMean = cellPointHeight[n] - aCell.avgHeight;
+						cellVariance += devFromMean * devFromMean;
+					}
+					cellVariance /= aCell.nbPoints;
+					aCell.stdDevHeight = std::sqrt(cellVariance);
 				}
-				cellVariance /= aCell.nbPoints;
-				aCell.stdDevHeight = sqrt(std::abs(cellVariance - aCell.avgHeight*aCell.avgHeight));
+				else
+				{
+					assert(zStdDevSfIndex>=0);
+					//Calculate weighted average 
+					CCCoreLib::ScalarField* sf = pc->getScalarField(zStdDevSfIndex);
+					assert(sf);
+					// Read out inverse variance for all points in  current cell 
+					for (unsigned n = 0; n < aCell.nbPoints ;n++)
+					{
+						unsigned pointIndex = cellPointIndexedHeight[n].index;
+						auto stdDev = sf->getValue(pointIndex);
+						cellPointSF[n] = 1.f / (stdDev*stdDev);
+					}
+					auto cellPointSFEnd = std::next(cellPointSF.begin(), aCell.nbPoints);
 
+					auto sumInverseVariance = std::accumulate(cellPointSF.begin(), cellPointSFEnd, 0.0);
+					
+					//Calcualte weighted average of height
+					double sumWeightedHeight = 0.0;
+					for (unsigned n = 0; n < aCell.nbPoints ;n++)
+					{
+						sumWeightedHeight += cellPointSF[n] * cellPointHeight[n];
+					}
+					aCell.avgHeight = sumWeightedHeight / sumInverseVariance;
+					
+					//Calculate resulting variance 
+					// First the contribution from weighted measured distance from mean value
+					double weightedVarianceMeas = 0.0;
+					for (unsigned n = 0; n < aCell.nbPoints ;n++)
+					{
+						auto devFromMean = cellPointHeight[n] - aCell.avgHeight;			  	// (u - u_n)
+						weightedVarianceMeas += cellPointSF[n] * (devFromMean * devFromMean);  	// Contribution from measured deviation from mean : k_n * (u _n - u)^2 
+					}
+					weightedVarianceMeas /= sumInverseVariance;
+					
+					// Then the contribution from the reported variance
+					double weightedVarianceModel = 1.f/sumInverseVariance;
+
+					aCell.stdDevHeight = std::sqrt(weightedVarianceMeas + weightedVarianceModel);
+				}
 				
 				//Pick point index to report and set the right 'height' value
 				switch (projectionType)
@@ -406,6 +453,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					aCell.pointIndex = cellPointIndexedHeight.front().index;
 					break;
 				case PROJ_AVERAGE_VALUE:
+				case PROJ_INVERSE_VAR_VALUE:
 					aCell.h = aCell.avgHeight;
 					break;
 				case PROJ_MEDIAN_VALUE:
@@ -414,7 +462,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					break;
 				case PROJ_MAXIMUM_VALUE:
 					aCell.h = aCell.maxHeight;
-					aCell.pointIndex = cellPointIndexedHeight.back().index;
+					aCell.pointIndex = cellPointIndexedHeight[aCell.nbPoints-1].index;
 					break;
 				default:
 					assert(false);
@@ -515,7 +563,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								}
 								break;
 							case PROJ_MAXIMUM_VALUE:
-								scalarFields[k][pos] = cellPointSF.back(); 
+								scalarFields[k][pos] = cellPointSF[validPoints-1]; 
 								break;
 							default:
 								assert(false);

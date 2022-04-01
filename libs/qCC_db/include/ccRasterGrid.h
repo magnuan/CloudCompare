@@ -156,6 +156,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 							PROJ_AVERAGE_VALUE			= 1,
 							PROJ_MAXIMUM_VALUE			= 2,
 							PROJ_MEDIAN_VALUE			= 3,
+							PROJ_INVERSE_VAR_VALUE		= 4,
 							INVALID_PROJECTION_TYPE		= 255,
 	};
 
@@ -170,7 +171,8 @@ struct QCC_DB_LIB_API ccRasterGrid
 					bool doInterpolateEmptyCells,
 					double maxEdgeLength,
 					ProjectionType sfInterpolation = INVALID_PROJECTION_TYPE,
-					ccProgressDialog* progressDialog = nullptr);
+					ccProgressDialog* progressDialog = nullptr,
+					int zStdDevSfIndex = -1);
 
 	//! Option for handling empty cells
 	enum EmptyCellFillOption {	LEAVE_EMPTY				= 0,

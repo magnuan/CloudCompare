@@ -105,6 +105,9 @@ private:
 
 	//! Called when the projection direction changes
 	void projectionDirChanged(int);
+	
+	//! Called when the Std Dev layer changes
+	void stdDevLayerChanged(int);
 
 	//! Called when the projection type changes
 	void projectionTypeChanged(int);
@@ -143,6 +146,7 @@ private: //standard methods
 	unsigned char getProjectionDimension() const override;
 	ccRasterGrid::ProjectionType getTypeOfProjection() const override;
 
+	int getStdDevLayerIndex() const;
 	//! Returns user defined height for empty cells
 	double getCustomHeightForEmptyCells() const;
 

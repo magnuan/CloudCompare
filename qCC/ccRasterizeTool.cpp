@@ -105,11 +105,15 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	connect(m_UI->clearContoursPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::removeContourLines);
 	
 	connect(m_UI->generateHillshadePushButton, &QAbstractButton::clicked,	this,	&ccRasterizeTool::generateHillshade);
+	connect(m_UI->stdDevLayerComboBox, qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::stdDevLayerChanged);
+
 
 	connect(m_UI->activeLayerComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this] (int index)
 	{
 		activeLayerChanged( index );
 	});
+
+	
 
 	//custom bbox editor
 	ccBBox gridBBox = m_cloud ? m_cloud->getOwnBB() : ccBBox(); 
@@ -154,6 +158,18 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 		}
 
 		m_UI->activeLayerComboBox->setEnabled(m_UI->activeLayerComboBox->count() > 1);
+		
+        //populate std dev layer box
+		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+			for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
+			{
+				m_UI->stdDevLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
+			}
+		}
+
+		m_UI->stdDevLayerComboBox->setEnabled(m_UI->stdDevLayerComboBox->count() > 1);
 
 		//add window
 		create2DView(m_UI->mapFrame);
@@ -253,6 +269,11 @@ unsigned char ccRasterizeTool::getProjectionDimension() const
 	return static_cast<unsigned char>(dim);
 }
 
+int ccRasterizeTool::getStdDevLayerIndex() const
+{
+	return  m_UI->stdDevLayerComboBox->currentIndex();
+}
+
 void ccRasterizeTool::resampleOptionToggled(bool state)
 {
 	m_UI->warningResampleWithAverageLabel->setVisible(m_UI->resampleCloudCheckBox->isChecked() && getTypeOfProjection() == ccRasterGrid::PROJ_AVERAGE_VALUE);
@@ -278,6 +299,12 @@ void ccRasterizeTool::projectionDirChanged(int dir)
 	updateGridInfo();
 	gridIsUpToDate(false);
 }
+
+void ccRasterizeTool::stdDevLayerChanged(int index)
+{
+	gridIsUpToDate(false);
+}
+
 
 void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*/)
 {
@@ -402,6 +429,8 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
 	case 3:
 		return ccRasterGrid::PROJ_MEDIAN_VALUE;
+	case 4:
+		return ccRasterGrid::PROJ_INVERSE_VAR_VALUE;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);
@@ -778,6 +807,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	const unsigned char Z = getProjectionDimension();
 	assert(Z <= 2);
 
+    int zStdDevSfIndex = getStdDevLayerIndex();
+
 	ccProgressDialog pDlg(true, this);
 	if (!m_grid.fillWith(	m_cloud,
 							Z,
@@ -785,7 +816,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 							interpolateEmptyCells,
 							maxEdgeLength,
 							interpolateSFs,
-							&pDlg))
+							&pDlg,
+                            zStdDevSfIndex))
 	{
 		return false;
 	}
