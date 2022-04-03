@@ -249,6 +249,8 @@ bool ccRasterizeTool::exportAsSF(ccRasterGrid::ExportableFields field) const
 		return m_UI->generateHeightRangeSFcheckBox->isChecked();
 	case ccRasterGrid::PER_CELL_MEDIAN_HEIGHT:
 		return m_UI->generateMedianHeightSFcheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_HEIGHT_MODEL_STD_DEV:
+		return m_UI->generateModelStdDevHeightSFcheckBox->isChecked();
 	default:
 		assert(false);
 	};
@@ -879,6 +881,8 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_RANGE);
 		if (exportAsSF(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT))
 			exportedFields.push_back(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT);
+		if (exportAsSF(ccRasterGrid::PER_CELL_HEIGHT_MODEL_STD_DEV))
+			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_MODEL_STD_DEV);
 	}
 	catch (const std::bad_alloc&)
 	{

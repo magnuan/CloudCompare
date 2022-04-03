@@ -619,6 +619,16 @@ replaced by the cell's average height!</string>
                 </widget>
                </item>
                <item row="3" column="0">
+                <widget class="QCheckBox" name="generateModelStdDevHeightSFcheckBox">
+                 <property name="toolTip">
+                  <string>For inverse variance averaging, with input std. dev. Scalar field. Add a scalar field with the std.dev. based on the reported std. dev.</string>
+                 </property>
+                 <property name="text">
+                  <string>height model std.dev.</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
                 <widget class="QCheckBox" name="generateMedianHeightSFcheckBox">
                  <property name="toolTip">
                   <string>Adds a scalar field with the median height of the points inside the cell</string>

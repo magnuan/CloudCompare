@@ -46,6 +46,7 @@ struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
 		insert(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV, "Std. dev. height");
 		insert(ccRasterGrid::PER_CELL_HEIGHT_RANGE,   "Height range");
 		insert(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT,  "Median height");
+		insert(ccRasterGrid::PER_CELL_HEIGHT_MODEL_STD_DEV, "Model Std. dev. height"); //This is generated from the input SF, output with same name
 	}
 };
 static DefaultFieldNames s_defaultFieldNames;
@@ -442,7 +443,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					// Then the contribution from the reported variance
 					double weightedVarianceModel = 1.f/sumInverseVariance;
 
-					aCell.stdDevHeight = std::sqrt(weightedVarianceMeas + weightedVarianceModel);
+					aCell.stdDevHeight = std::sqrt(weightedVarianceMeas);
+					aCell.modelStdDevHeight = std::sqrt(weightedVarianceModel);
 				}
 				
 				//Pick point index to report and set the right 'height' value
@@ -1099,6 +1101,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 			case PER_CELL_AVG_HEIGHT:
 			case PER_CELL_MEDIAN_HEIGHT:
 			case PER_CELL_HEIGHT_STD_DEV:
+			case PER_CELL_HEIGHT_MODEL_STD_DEV:
 			case PER_CELL_HEIGHT_RANGE:
 			{
 				QString sfName = GetDefaultFieldName(exportedFields[i]);
@@ -1240,6 +1243,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 						break;
 					case PER_CELL_HEIGHT_STD_DEV:
 						sVal = static_cast<ScalarType>(aCell->stdDevHeight);
+						break;
+					case PER_CELL_HEIGHT_MODEL_STD_DEV:
+						sVal = static_cast<ScalarType>(aCell->modelStdDevHeight);
 						break;
 					case PER_CELL_HEIGHT_RANGE:
 						sVal = static_cast<ScalarType>(aCell->maxHeight - aCell->minHeight);

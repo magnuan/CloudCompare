@@ -60,8 +60,10 @@ struct QCC_DB_LIB_API ccRasterCell
 	double avgHeight;
 	//! Median height value
 	double medianHeight;
-	//! Height std.dev.
+	//! Height std.dev.         (Caclulated from measured Std.Dev. in cell)
 	double stdDevHeight;
+	//! Height model std.dev.   (Calculated from input Std.Dev Scalar field)
+	double modelStdDevHeight;
 	//! Min height value
 	PointCoordinateType minHeight;
 	//! Max height value
@@ -132,6 +134,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 							PER_CELL_HEIGHT_STD_DEV,
 							PER_CELL_HEIGHT_RANGE,
 							PER_CELL_MEDIAN_HEIGHT,
+							PER_CELL_HEIGHT_MODEL_STD_DEV,
 							PER_CELL_INVALID,
 	};
 
