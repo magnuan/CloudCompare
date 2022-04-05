@@ -46,7 +46,6 @@ struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
 		insert(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV, "Std. dev. height");
 		insert(ccRasterGrid::PER_CELL_HEIGHT_RANGE,   "Height range");
 		insert(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT,  "Median height");
-		insert(ccRasterGrid::PER_CELL_HEIGHT_MODEL_STD_DEV, "Model Std. dev. height"); //This is generated from the input SF, output with same name
 	}
 };
 static DefaultFieldNames s_defaultFieldNames;
@@ -527,6 +526,15 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						assert(!scalarFields[k].empty());
 						CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
 						assert(sf && pos < scalarFields[k].size());
+                        //Special case for input std deviation input layer if in "inverse variance" projection mode
+                        //Output layer should just be filed with the updated model standard deviation 
+				        if ((projectionType == PROJ_INVERSE_VAR_VALUE) && (k== zStdDevSfIndex))
+                        {
+						    scalarFields[k][pos] = aCell.modelStdDevHeight;
+                            continue;
+                        }
+
+
 						// Set up vector of valid sf values for current cell 
 						unsigned validPoints = 0;
 						for (unsigned n = 0; n < aCell.nbPoints ;n++)
@@ -1101,7 +1109,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 			case PER_CELL_AVG_HEIGHT:
 			case PER_CELL_MEDIAN_HEIGHT:
 			case PER_CELL_HEIGHT_STD_DEV:
-			case PER_CELL_HEIGHT_MODEL_STD_DEV:
 			case PER_CELL_HEIGHT_RANGE:
 			{
 				QString sfName = GetDefaultFieldName(exportedFields[i]);
@@ -1243,9 +1250,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 						break;
 					case PER_CELL_HEIGHT_STD_DEV:
 						sVal = static_cast<ScalarType>(aCell->stdDevHeight);
-						break;
-					case PER_CELL_HEIGHT_MODEL_STD_DEV:
-						sVal = static_cast<ScalarType>(aCell->modelStdDevHeight);
 						break;
 					case PER_CELL_HEIGHT_RANGE:
 						sVal = static_cast<ScalarType>(aCell->maxHeight - aCell->minHeight);

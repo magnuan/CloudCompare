@@ -159,7 +159,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 
 		m_UI->activeLayerComboBox->setEnabled(m_UI->activeLayerComboBox->count() > 1);
 		
-        //populate std dev layer box
+		//populate std dev layer box
 		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
@@ -168,9 +168,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 				m_UI->stdDevLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
 			}
 		}
-
-		m_UI->stdDevLayerComboBox->setEnabled(m_UI->stdDevLayerComboBox->count() > 1);
-
+		m_UI->stdDevLayerComboBox->setEnabled( (m_UI->stdDevLayerComboBox->count() > 1) && (getTypeOfProjection() == ccRasterGrid::PROJ_INVERSE_VAR_VALUE) );
 		//add window
 		create2DView(m_UI->mapFrame);
 	}
@@ -249,8 +247,6 @@ bool ccRasterizeTool::exportAsSF(ccRasterGrid::ExportableFields field) const
 		return m_UI->generateHeightRangeSFcheckBox->isChecked();
 	case ccRasterGrid::PER_CELL_MEDIAN_HEIGHT:
 		return m_UI->generateMedianHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_HEIGHT_MODEL_STD_DEV:
-		return m_UI->generateModelStdDevHeightSFcheckBox->isChecked();
 	default:
 		assert(false);
 	};
@@ -287,7 +283,10 @@ void ccRasterizeTool::projectionTypeChanged(int index)
 	//we can't use the 'resample origin cloud' option with 'average height' projection
 	//resampleCloudCheckBox->setEnabled(index != PROJ_AVERAGE_VALUE);
 	//DGM: now we can! We simply display a warning message
+	
 	m_UI->warningResampleWithAverageLabel->setVisible(m_UI->resampleCloudCheckBox->isChecked() && index == ccRasterGrid::PROJ_AVERAGE_VALUE);
+
+	m_UI->stdDevLayerComboBox->setEnabled( (m_UI->stdDevLayerComboBox->count() > 1) && (getTypeOfProjection() == ccRasterGrid::PROJ_INVERSE_VAR_VALUE) );
 	gridIsUpToDate(false);
 }
 
@@ -881,8 +880,6 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_RANGE);
 		if (exportAsSF(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT))
 			exportedFields.push_back(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_HEIGHT_MODEL_STD_DEV))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_MODEL_STD_DEV);
 	}
 	catch (const std::bad_alloc&)
 	{

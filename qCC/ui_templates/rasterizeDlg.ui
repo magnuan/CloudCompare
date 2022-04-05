@@ -117,26 +117,13 @@
             <widget class="QComboBox" name="activeLayerComboBox"/>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_21">
-             <property name="toolTip">
-              <string>Active layer std. dev. scalar field</string>
-             </property>
-             <property name="text">
-              <string>Std. dev. layer</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QComboBox" name="stdDevLayerComboBox"/>
-           </item>
-           <item row="5" column="0">
             <widget class="QLabel" name="label_7">
              <property name="text">
               <string>range</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="1">
+           <item row="4" column="1">
             <widget class="QLabel" name="gridLayerRangeLabel">
              <property name="text">
               <string/>
@@ -278,6 +265,19 @@
             </widget>
            </item>
            <item row="2" column="0">
+            <widget class="QLabel" name="label_21">
+             <property name="toolTip">
+              <string>Active layer std. dev. scalar field</string>
+             </property>
+             <property name="text">
+              <string>Std. dev. layer</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="stdDevLayerComboBox"/>
+           </item>
+           <item row="4" column="0">
             <widget class="QCheckBox" name="interpolateSFCheckBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -296,7 +296,7 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
+           <item row="5" column="0" colspan="2">
             <widget class="QLabel" name="warningResampleWithAverageLabel">
              <property name="enabled">
               <bool>false</bool>
@@ -615,16 +615,6 @@ replaced by the cell's average height!</string>
                  </property>
                  <property name="text">
                   <string>height range</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QCheckBox" name="generateModelStdDevHeightSFcheckBox">
-                 <property name="toolTip">
-                  <string>For inverse variance averaging, with input std. dev. Scalar field. Add a scalar field with the std.dev. based on the reported std. dev.</string>
-                 </property>
-                 <property name="text">
-                  <string>height model std.dev.</string>
                  </property>
                 </widget>
                </item>
