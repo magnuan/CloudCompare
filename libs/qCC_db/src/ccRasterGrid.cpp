@@ -470,7 +470,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					break;
 				}
 				// Average value, is a bit of a special case, here we report the index closest to cell center
-				if (projectionType == PROJ_AVERAGE_VALUE)
+				if ( (projectionType == PROJ_AVERAGE_VALUE ) ||  (projectionType == PROJ_INVERSE_VAR_VALUE) )
 				{
 					//we keep track of the point which is the closest to the cell center (in 2D)
 					CCVector2d C = computeCellCenter(cellPos.x, cellPos.y, X, Y);
@@ -561,6 +561,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								scalarFields[k][pos] = cellPointSF.front();
 								break;
 							case PROJ_AVERAGE_VALUE:
+				            case PROJ_INVERSE_VAR_VALUE:   //TODO: We should probably use proper inverse variance calculation for SF interpolation as well, but for now we just do a simple average
 								scalarFields[k][pos] = std::accumulate(cellPointSF.begin(), cellPointSFEnd, 0.0) / validPoints;
 								break;
 							case PROJ_MEDIAN_VALUE:
