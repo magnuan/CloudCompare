@@ -524,7 +524,7 @@ replaced by the cell's average height!</string>
             <item>
              <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>Export per-cell statistics as SF(s):</string>
+               <string>Export height statistics:</string>
               </property>
              </widget>
             </item>
@@ -628,9 +628,177 @@ replaced by the cell's average height!</string>
                  </property>
                 </widget>
                </item>
+
               </layout>
              </widget>
             </item>
+
+            <item>
+             <widget class="Line" name="line_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+
+            <item>
+             <widget class="QLabel" name="label_22">
+              <property name="text">
+               <string>Export scalar fields statistics:</string>
+              </property>
+             </widget>
+            </item>
+
+            <item>
+             <widget class="QFrame" name="exportSFCloudSFFrame">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_2">
+			   <property name="verticalSpacing">
+				<number>6</number>
+			   </property>
+
+               <item row="0" column="0">
+                <widget class="QCheckBox" name="generateSFStatisticsProjectedCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with value based on the projected height value</string>
+                 </property>
+                 <property name="text">
+                  <string>projected</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QCheckBox" name="generateSFStatisticsAverageCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with an average of values withih each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>average</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QCheckBox" name="generateSFStatisticsPopulationCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with grid density (= number of points inside each cell)</string>
+                 </property>
+                 <property name="text">
+                  <string>population</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QCheckBox" name="generateSFStatisticsMinCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with the minimum value inside each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>min</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QCheckBox" name="generateSFStatisticsMaxCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with the maximum value inside each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>max</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QCheckBox" name="generateSFStatisticsRangeCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with the range of values within each cell (= max - min)</string>
+                 </property>
+                 <property name="text">
+                  <string>range</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QCheckBox" name="generateSFStatisticsStdDevCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with the standard deviation of values within each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>std. dev.</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QCheckBox" name="generateSFStatisticsMedianCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with the median of values within each cell (= p50 percentile)</string>
+                 </property>
+                 <property name="text">
+                  <string>median</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <widget class="QCheckBox" name="generateSFStatisticsUniqueCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with the number of unique values within each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>unique</string>
+                 </property>
+                </widget>
+               </item>
+               
+			   
+			   <item row="3" column="0">
+                <widget class="QCheckBox" name="generateSFStatisticsPercentileCheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field for each input scalar field, with a specific percentile within each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>percentile</string>
+                 </property>
+                </widget>
+               </item>
+
+			   <item row="3" column="1">
+				<widget class="QDoubleSpinBox" name="generateSFStatisticsPercentileDoubleSpinBox">
+				 <property name="enabled">
+				  <bool>true</bool>
+				 </property>
+				 <property name="toolTip">
+				  <string>Percentile value 0-100</string>
+				 </property>
+				 <property name="decimals">
+				  <number>0</number>
+				 </property>
+				 <property name="minimum">
+				  <double>0</double>
+				 </property>
+				 <property name="maximum">
+				  <double>100</double>
+				 </property>
+				</widget>
+			   </item>
+
+
+              </layout>
+             </widget>
+            </item>
+
+
+
+
             <item>
              <spacer name="verticalSpacer">
               <property name="orientation">
@@ -892,7 +1060,7 @@ replaced by the cell's average height!</string>
              <number>0</number>
             </property>
             <item>
-             <widget class="QLabel" name="label_16">
+             <widget class="QLabel" name="label_17">
               <property name="font">
                <font>
                 <italic>true</italic>
@@ -909,7 +1077,7 @@ replaced by the cell's average height!</string>
             <item>
              <layout class="QFormLayout" name="formLayout_5">
               <item row="0" column="0">
-               <widget class="QLabel" name="label_17">
+               <widget class="QLabel" name="label_17b">
                 <property name="text">
                  <string>Sun zenith</string>
                 </property>
