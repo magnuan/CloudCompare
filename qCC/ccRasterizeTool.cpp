@@ -512,12 +512,26 @@ void ccRasterizeTool::loadSettings()
 	int minVertexCount			= settings.value("MinVertexCount",        m_UI->minVertexCountSpinBox->value()).toInt();
 	bool ignoreBorders			= settings.value("IgnoreBorders",         m_UI->ignoreContourBordersCheckBox->isChecked()).toBool();
 	bool generateCountSF		= settings.value("generateCountSF",       m_UI->generateCountSFcheckBox->isChecked()).toBool();
+	bool generateMedianHeightSF	= settings.value("generateMedianHeightSF",   m_UI->generateMedianHeightSFcheckBox->isChecked()).toBool();
 	bool generateMinHeightSF	= settings.value("generateMinHeightSF",   m_UI->generateMinHeightSFcheckBox->isChecked()).toBool();
-	bool generateMaxHeightSF	= settings.value("generateMaxHeightSF",   m_UI->generateMinHeightSFcheckBox->isChecked()).toBool();
+	bool generateMaxHeightSF	= settings.value("generateMaxHeightSF",   m_UI->generateMaxHeightSFcheckBox->isChecked()).toBool();
 	bool generateAbgHeightSF	= settings.value("generateAvgHeightSF",   m_UI->generateAvgHeightSFcheckBox->isChecked()).toBool();
 	bool generateStdDevHeightSF	= settings.value("generateStdDevHeightSF",m_UI->generateStdDevHeightSFcheckBox->isChecked()).toBool();
 	bool generateHeightRangeSF	= settings.value("generateHeightRangeSF", m_UI->generateHeightRangeSFcheckBox->isChecked()).toBool();
 	bool projectContoursOnAlt	= settings.value("projectContoursOnAlt",  m_UI->projectContoursOnAltCheckBox->isChecked()).toBool();
+	
+	//SF Statistics checkboxes
+	bool generateSFStatisticsProjected			= settings.value("generateSFStatisticsProjected",	   	m_UI->generateSFStatisticsProjectedCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsPopulation			= settings.value("generateSFStatisticsPopulation",	   	m_UI->generateSFStatisticsPopulationCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsMin				= settings.value("generateSFStatisticsMin",	   			m_UI->generateSFStatisticsMinCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsMax				= settings.value("generateSFStatisticsMax",	   			m_UI->generateSFStatisticsMaxCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsAverage			= settings.value("generateSFStatisticsAverage",	   		m_UI->generateSFStatisticsAverageCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsStdDev				= settings.value("generateSFStatisticsStdDev",	   		m_UI->generateSFStatisticsStdDevCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsRange				= settings.value("generateSFStatisticsRange",	   		m_UI->generateSFStatisticsRangeCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsMedian				= settings.value("generateSFStatisticsMedian",	   		m_UI->generateSFStatisticsMedianCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsUnique				= settings.value("generateSFStatisticsUnique",	   		m_UI->generateSFStatisticsUniqueCheckBox->isChecked()).toBool();
+	bool generateSFStatisticsPercentile			= settings.value("generateSFStatisticsPercentile",	   	m_UI->generateSFStatisticsPercentileCheckBox->isChecked()).toBool();
+	double generateSFStatisticsPercentileValue	= settings.value("generateSFStatisticsPercentileValue", m_UI->generateSFStatisticsPercentileDoubleSpinBox->value()).toDouble();
 	
 	settings.endGroup();
 
@@ -534,12 +548,27 @@ void ccRasterizeTool::loadSettings()
 	m_UI->minVertexCountSpinBox->setValue(minVertexCount);
 	m_UI->ignoreContourBordersCheckBox->setChecked(ignoreBorders);
 	m_UI->generateCountSFcheckBox->setChecked(generateCountSF);
+	m_UI->generateMedianHeightSFcheckBox->setChecked(generateMedianHeightSF);
 	m_UI->generateMinHeightSFcheckBox->setChecked(generateMinHeightSF);
-	m_UI->generateMinHeightSFcheckBox->setChecked(generateMaxHeightSF);
+	m_UI->generateMaxHeightSFcheckBox->setChecked(generateMaxHeightSF);
 	m_UI->generateAvgHeightSFcheckBox->setChecked(generateAbgHeightSF);
 	m_UI->generateStdDevHeightSFcheckBox->setChecked(generateStdDevHeightSF);
 	m_UI->generateHeightRangeSFcheckBox->setChecked(generateHeightRangeSF);
 	m_UI->projectContoursOnAltCheckBox->setChecked(projectContoursOnAlt);
+
+	//SF Statistics checkboxes
+	m_UI->generateSFStatisticsProjectedCheckBox->setChecked(  generateSFStatisticsProjected		);
+	m_UI->generateSFStatisticsPopulationCheckBox->setChecked( generateSFStatisticsPopulation	);
+    m_UI->generateSFStatisticsMinCheckBox->setChecked(		  generateSFStatisticsMin	     	);
+    m_UI->generateSFStatisticsMaxCheckBox->setChecked(		  generateSFStatisticsMax	     	);
+    m_UI->generateSFStatisticsAverageCheckBox->setChecked(	  generateSFStatisticsAverage     	);
+    m_UI->generateSFStatisticsStdDevCheckBox->setChecked(	  generateSFStatisticsStdDev	   	);
+    m_UI->generateSFStatisticsRangeCheckBox->setChecked(	  generateSFStatisticsRange	      	);
+    m_UI->generateSFStatisticsMedianCheckBox->setChecked(	  generateSFStatisticsMedian	   	);
+    m_UI->generateSFStatisticsUniqueCheckBox->setChecked(	  generateSFStatisticsUnique	   	);
+    m_UI->generateSFStatisticsPercentileCheckBox->setChecked( generateSFStatisticsPercentile	);
+	m_UI->generateSFStatisticsPercentileDoubleSpinBox->setValue(generateSFStatisticsPercentileValue);
+
 }
 
 bool ccRasterizeTool::canClose()
@@ -591,12 +620,27 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("MinVertexCount", m_UI->minVertexCountSpinBox->value());
 	settings.setValue("IgnoreBorders", m_UI->ignoreContourBordersCheckBox->isChecked());
 	settings.setValue("generateCountSF", m_UI->generateCountSFcheckBox->isChecked());
+	settings.setValue("generateMedianHeightSF", m_UI->generateMedianHeightSFcheckBox->isChecked());
 	settings.setValue("generateMinHeightSF", m_UI->generateMinHeightSFcheckBox->isChecked());
-	settings.setValue("generateMaxHeightSF", m_UI->generateMinHeightSFcheckBox->isChecked());
+	settings.setValue("generateMaxHeightSF", m_UI->generateMaxHeightSFcheckBox->isChecked());
 	settings.setValue("generateAvgHeightSF", m_UI->generateAvgHeightSFcheckBox->isChecked());
 	settings.setValue("generateStdDevHeightSF", m_UI->generateStdDevHeightSFcheckBox->isChecked());
 	settings.setValue("generateHeightRangeSF", m_UI->generateHeightRangeSFcheckBox->isChecked());
 	settings.setValue("projectContoursOnAlt", m_UI->projectContoursOnAltCheckBox->isChecked());
+
+	//SF Statistics checkboxes
+	settings.setValue("generateSFStatisticsProjected",	   	m_UI->generateSFStatisticsProjectedCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsPopulation",	   	m_UI->generateSFStatisticsPopulationCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsMin",	   			m_UI->generateSFStatisticsMinCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsMax",	   			m_UI->generateSFStatisticsMaxCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsAverage",	   		m_UI->generateSFStatisticsAverageCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsStdDev",	   		m_UI->generateSFStatisticsStdDevCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsRange",	   		m_UI->generateSFStatisticsRangeCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsMedian",	   		m_UI->generateSFStatisticsMedianCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsUnique",	   		m_UI->generateSFStatisticsUniqueCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsPercentile",	   	m_UI->generateSFStatisticsPercentileCheckBox->isChecked());
+	settings.setValue("generateSFStatisticsPercentileValue", m_UI->generateSFStatisticsPercentileDoubleSpinBox->value());
+
 	settings.endGroup();
 }
 
@@ -919,6 +963,8 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	QString activeLayerName = m_UI->activeLayerComboBox->currentText();
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
 	//bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
+
+    //TODO magnuan, replace interpolateSF with exportedSFStatistics
 	ccPointCloud* rasterCloud = convertGridToCloud(	exportedFields,
 													/*interpolateSF=*/(getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF,
 													/*interpolateColors=*/true,
