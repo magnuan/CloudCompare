@@ -157,6 +157,9 @@ private: //standard methods
 
 	//! Returns whether a given field count should be exported as SF (only if a cloud is generated!)
 	bool exportAsSF(ccRasterGrid::ExportableFields field) const;
+	
+    //! Returns whether a given statistical parameter should be exported for all SFs (only if a cloud is generated!)
+	bool exportSFStatistics(ccRasterGrid::ExportableFields field) const;
 
 	//! Returns whether the output cloud should use the original cloud or the grid as 'support'
 	bool resampleOriginalCloud() const;

@@ -363,7 +363,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			try
 			{
 				//we always compute the default 'height' layer
-				exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
+				exportedFields.push_back(ccRasterGrid::PER_CELL_VALUE);
 			}
 			catch (const std::bad_alloc&)
 			{

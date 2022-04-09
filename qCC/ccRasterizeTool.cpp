@@ -143,7 +143,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 		}
 
 		//populate layer box
-		m_UI->activeLayerComboBox->addItem(ccRasterGrid::GetDefaultFieldName(ccRasterGrid::PER_CELL_HEIGHT), QVariant(LAYER_HEIGHT));
+		m_UI->activeLayerComboBox->addItem(ccRasterGrid::GetDefaultFieldName(ccRasterGrid::PER_CELL_VALUE), QVariant(LAYER_HEIGHT));
 		if (m_cloud->hasColors())
 		{
 			m_UI->activeLayerComboBox->addItem("RGB", QVariant(LAYER_RGB));
@@ -235,18 +235,48 @@ bool ccRasterizeTool::exportAsSF(ccRasterGrid::ExportableFields field) const
 	{
 	case ccRasterGrid::PER_CELL_COUNT:
 		return m_UI->generateCountSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_MIN_HEIGHT:
+	case ccRasterGrid::PER_CELL_MIN_VALUE:
 		return m_UI->generateMinHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_MAX_HEIGHT:
+	case ccRasterGrid::PER_CELL_MAX_VALUE:
 		return m_UI->generateMaxHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_AVG_HEIGHT:
+	case ccRasterGrid::PER_CELL_AVG_VALUE:
 		return m_UI->generateAvgHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_HEIGHT_STD_DEV:
+	case ccRasterGrid::PER_CELL_VALUE_STD_DEV:
 		return m_UI->generateStdDevHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_HEIGHT_RANGE:
+	case ccRasterGrid::PER_CELL_VALUE_RANGE:
 		return m_UI->generateHeightRangeSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_MEDIAN_HEIGHT:
+	case ccRasterGrid::PER_CELL_MEDIAN_VALUE:
 		return m_UI->generateMedianHeightSFcheckBox->isChecked();
+	default:
+		assert(false);
+	};
+	
+	return false;
+}
+
+
+bool ccRasterizeTool::exportSFStatistics(ccRasterGrid::ExportableFields field) const
+{
+	switch (field)
+	{
+	case ccRasterGrid::PER_CELL_COUNT:
+		return m_UI->generateSFStatisticsPopulationCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_MIN_VALUE:
+		return m_UI->generateSFStatisticsMinCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_MAX_VALUE:
+		return m_UI->generateSFStatisticsMaxCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_AVG_VALUE:
+		return m_UI->generateSFStatisticsAverageCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_VALUE_STD_DEV:
+		return m_UI->generateSFStatisticsStdDevCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_VALUE_RANGE:
+		return m_UI->generateSFStatisticsRangeCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_MEDIAN_VALUE:
+		return m_UI->generateSFStatisticsMedianCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_UNIQUE_VALUE:
+		return m_UI->generateSFStatisticsUniqueCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_PERCENTILE_VALUE:
+		return m_UI->generateSFStatisticsPercentileCheckBox->isChecked();
 	default:
 		assert(false);
 	};
@@ -700,7 +730,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 		try
 		{
 			//we always compute the default 'height' layer
-			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
+			exportedFields.push_back(ccRasterGrid::PER_CELL_VALUE);
 			//but we may also have to compute the 'original SF(s)' layer(s)
 			QString activeLayerName = m_UI->activeLayerComboBox->currentText();
 			m_rasterCloud = convertGridToCloud(	exportedFields,
@@ -865,21 +895,21 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	std::vector<ccRasterGrid::ExportableFields> exportedFields;
 	try
 	{
-		exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
+		exportedFields.push_back(ccRasterGrid::PER_CELL_VALUE);
 		if (exportAsSF(ccRasterGrid::PER_CELL_COUNT))
 			exportedFields.push_back(ccRasterGrid::PER_CELL_COUNT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_MIN_HEIGHT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_MIN_HEIGHT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_MAX_HEIGHT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_MAX_HEIGHT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_AVG_HEIGHT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_AVG_HEIGHT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV);
-		if (exportAsSF(ccRasterGrid::PER_CELL_HEIGHT_RANGE))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_RANGE);
-		if (exportAsSF(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT);
+		if (exportAsSF(ccRasterGrid::PER_CELL_MIN_VALUE))
+			exportedFields.push_back(ccRasterGrid::PER_CELL_MIN_VALUE);
+		if (exportAsSF(ccRasterGrid::PER_CELL_MAX_VALUE))
+			exportedFields.push_back(ccRasterGrid::PER_CELL_MAX_VALUE);
+		if (exportAsSF(ccRasterGrid::PER_CELL_AVG_VALUE))
+			exportedFields.push_back(ccRasterGrid::PER_CELL_AVG_VALUE);
+		if (exportAsSF(ccRasterGrid::PER_CELL_VALUE_STD_DEV))
+			exportedFields.push_back(ccRasterGrid::PER_CELL_VALUE_STD_DEV);
+		if (exportAsSF(ccRasterGrid::PER_CELL_VALUE_RANGE))
+			exportedFields.push_back(ccRasterGrid::PER_CELL_VALUE_RANGE);
+		if (exportAsSF(ccRasterGrid::PER_CELL_MEDIAN_VALUE))
+			exportedFields.push_back(ccRasterGrid::PER_CELL_MEDIAN_VALUE);
 	}
 	catch (const std::bad_alloc&)
 	{

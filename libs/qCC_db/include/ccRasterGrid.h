@@ -126,14 +126,16 @@ struct QCC_DB_LIB_API ccRasterGrid
 	void reset();
 
 	//! Exportable fields
-	enum ExportableFields { PER_CELL_HEIGHT,
+	enum ExportableFields { PER_CELL_VALUE,
 							PER_CELL_COUNT,
-							PER_CELL_MIN_HEIGHT,
-							PER_CELL_MAX_HEIGHT,
-							PER_CELL_AVG_HEIGHT,
-							PER_CELL_HEIGHT_STD_DEV,
-							PER_CELL_HEIGHT_RANGE,
-							PER_CELL_MEDIAN_HEIGHT,
+							PER_CELL_MIN_VALUE,
+							PER_CELL_MAX_VALUE,
+							PER_CELL_AVG_VALUE,
+							PER_CELL_VALUE_STD_DEV,
+							PER_CELL_VALUE_RANGE,
+							PER_CELL_MEDIAN_VALUE,
+							PER_CELL_PERCENTILE_VALUE,
+							PER_CELL_UNIQUE_VALUE,
 							PER_CELL_INVALID,
 	};
 

@@ -38,14 +38,14 @@ struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
 {
 	DefaultFieldNames()
 	{
-		insert(ccRasterGrid::PER_CELL_HEIGHT,         "Height grid values");
+		insert(ccRasterGrid::PER_CELL_VALUE,         "Height grid values");
 		insert(ccRasterGrid::PER_CELL_COUNT,          "Per-cell population");
-		insert(ccRasterGrid::PER_CELL_MIN_HEIGHT,     "Min height");
-		insert(ccRasterGrid::PER_CELL_MAX_HEIGHT,     "Max height");
-		insert(ccRasterGrid::PER_CELL_AVG_HEIGHT,     "Average height");
-		insert(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV, "Std. dev. height");
-		insert(ccRasterGrid::PER_CELL_HEIGHT_RANGE,   "Height range");
-		insert(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT,  "Median height");
+		insert(ccRasterGrid::PER_CELL_MIN_VALUE,     "Min height");
+		insert(ccRasterGrid::PER_CELL_MAX_VALUE,     "Max height");
+		insert(ccRasterGrid::PER_CELL_AVG_VALUE,     "Average height");
+		insert(ccRasterGrid::PER_CELL_VALUE_STD_DEV, "Std. dev. height");
+		insert(ccRasterGrid::PER_CELL_VALUE_RANGE,   "Height range");
+		insert(ccRasterGrid::PER_CELL_MEDIAN_VALUE,  "Median height");
 	}
 };
 static DefaultFieldNames s_defaultFieldNames;
@@ -1103,14 +1103,16 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 			int sfIndex = -1;
 			switch (exportedFields[i])
 			{
-			case PER_CELL_HEIGHT:
+			case PER_CELL_VALUE:
 			case PER_CELL_COUNT:
-			case PER_CELL_MIN_HEIGHT:
-			case PER_CELL_MAX_HEIGHT:
-			case PER_CELL_AVG_HEIGHT:
-			case PER_CELL_MEDIAN_HEIGHT:
-			case PER_CELL_HEIGHT_STD_DEV:
-			case PER_CELL_HEIGHT_RANGE:
+			case PER_CELL_MIN_VALUE:
+			case PER_CELL_MAX_VALUE:
+			case PER_CELL_AVG_VALUE:
+			case PER_CELL_MEDIAN_VALUE:
+			case PER_CELL_VALUE_STD_DEV:
+			case PER_CELL_VALUE_RANGE:
+			case PER_CELL_UNIQUE_VALUE:
+			case PER_CELL_PERCENTILE_VALUE:
 			{
 				QString sfName = GetDefaultFieldName(exportedFields[i]);
 				sfIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(sfName));
@@ -1231,28 +1233,34 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					ScalarType sVal = CCCoreLib::NAN_VALUE;
 					switch (exportedFields[k])
 					{
-					case PER_CELL_HEIGHT:
+					case PER_CELL_VALUE:
 						sVal = static_cast<ScalarType>(aCell->h);
 						break;
 					case PER_CELL_COUNT:
 						sVal = static_cast<ScalarType>(aCell->nbPoints);
 						break;
-					case PER_CELL_MIN_HEIGHT:
+					case PER_CELL_MIN_VALUE:
 						sVal = static_cast<ScalarType>(aCell->minHeight);
 						break;
-					case PER_CELL_MAX_HEIGHT:
+					case PER_CELL_MAX_VALUE:
 						sVal = static_cast<ScalarType>(aCell->maxHeight);
 						break;
-					case PER_CELL_AVG_HEIGHT:
+					case PER_CELL_AVG_VALUE:
 						sVal = static_cast<ScalarType>(aCell->avgHeight);
 						break;
-					case PER_CELL_MEDIAN_HEIGHT:
+					case PER_CELL_MEDIAN_VALUE:
 						sVal = static_cast<ScalarType>(aCell->medianHeight);
 						break;
-					case PER_CELL_HEIGHT_STD_DEV:
+					case PER_CELL_PERCENTILE_VALUE:
+						sVal = static_cast<ScalarType>(aCell->medianHeight);
+						break;
+					case PER_CELL_UNIQUE_VALUE:
+						sVal = static_cast<ScalarType>(aCell->medianHeight);
+						break;
+					case PER_CELL_VALUE_STD_DEV:
 						sVal = static_cast<ScalarType>(aCell->stdDevHeight);
 						break;
-					case PER_CELL_HEIGHT_RANGE:
+					case PER_CELL_VALUE_RANGE:
 						sVal = static_cast<ScalarType>(aCell->maxHeight - aCell->minHeight);
 						break;
 					default:
@@ -1317,7 +1325,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 						continue;
 					}
 
-					if (exportedFields[k] == PER_CELL_HEIGHT)
+					if (exportedFields[k] == PER_CELL_VALUE)
 					{
 						//we set the point height to the default height
 						ScalarType s = static_cast<ScalarType>(emptyCellsHeight);
