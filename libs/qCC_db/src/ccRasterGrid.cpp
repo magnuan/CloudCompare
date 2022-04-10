@@ -38,16 +38,16 @@ struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
 {
 	DefaultFieldNames()
 	{
-		insert(ccRasterGrid::PER_CELL_VALUE,         "Height grid values");
-		insert(ccRasterGrid::PER_CELL_COUNT,          "Per-cell population");
-		insert(ccRasterGrid::PER_CELL_MIN_VALUE,     "Min height");
-		insert(ccRasterGrid::PER_CELL_MAX_VALUE,     "Max height");
-		insert(ccRasterGrid::PER_CELL_AVG_VALUE,     "Average height");
-		insert(ccRasterGrid::PER_CELL_VALUE_STD_DEV, "Std. dev. height");
-		insert(ccRasterGrid::PER_CELL_VALUE_RANGE,   "Height range");
-		insert(ccRasterGrid::PER_CELL_MEDIAN_VALUE,  "Median height");
-		insert(ccRasterGrid::PER_CELL_UNIQUE_VALUE,   "Unique height values");
-		insert(ccRasterGrid::PER_CELL_PERCENTILE_VALUE,  "Percentile height value");
+		insert(ccRasterGrid::PER_CELL_VALUE,         "value");
+		insert(ccRasterGrid::PER_CELL_COUNT,         "population");
+		insert(ccRasterGrid::PER_CELL_MIN_VALUE,     "min");
+		insert(ccRasterGrid::PER_CELL_MAX_VALUE,     "max");
+		insert(ccRasterGrid::PER_CELL_AVG_VALUE,     "average");
+		insert(ccRasterGrid::PER_CELL_VALUE_STD_DEV, "std. dev.");
+		insert(ccRasterGrid::PER_CELL_VALUE_RANGE,   "range");
+		insert(ccRasterGrid::PER_CELL_MEDIAN_VALUE,  "median");
+		insert(ccRasterGrid::PER_CELL_UNIQUE_VALUE,   "unique");
+		insert(ccRasterGrid::PER_CELL_PERCENTILE_VALUE,  "percentile");
 	}
 };
 static DefaultFieldNames s_defaultFieldNames;
@@ -1153,42 +1153,59 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	assert(cloudGrid);
 
     // TODO magnuan01 | Here we add additional scalar fields based on the projected height 
-	//shall we generate additional scalar fields?
-	std::vector<CCCoreLib::ScalarField*> exportedSFs;
+	//shall we generate additional scalar fields, height data statistics?
+    unsigned numberOfExportedHeightStatisticsFields = exportedFields.size();
+    unsigned numberOfExportedSfStatisticsFields;
+	if (inputCloud->isA(CC_TYPES::POINT_CLOUD)){
+	    ccPointCloud* pc = static_cast<ccPointCloud*>(inputCloud);
+        numberOfExportedSfStatisticsFields = exportedSfStatistics.size() * pc->getNumberOfScalarFields();
+    }
+    else
+    {
+        numberOfExportedSfStatisticsFields = 0;
+    }
+	unsigned numberOfExportedStatisticsFields = numberOfExportedHeightStatisticsFields + numberOfExportedSfStatisticsFields;
+    
+    std::vector<CCCoreLib::ScalarField*> exportedSFs;
+    if ( numberOfExportedStatisticsFields > 0 )
+    {
+		exportedSFs.resize(numberOfExportedStatisticsFields, nullptr);
+    }
+
 	if (!exportedFields.empty())
 	{
-		exportedSFs.resize(exportedFields.size(), nullptr);
 		for (size_t i = 0; i < exportedFields.size(); ++i)
 		{
 			int sfIndex = -1;
 			switch (exportedFields[i])
 			{
-			case PER_CELL_VALUE:
-			case PER_CELL_COUNT:
-			case PER_CELL_MIN_VALUE:
-			case PER_CELL_MAX_VALUE:
-			case PER_CELL_AVG_VALUE:
-			case PER_CELL_MEDIAN_VALUE:
-			case PER_CELL_VALUE_STD_DEV:
-			case PER_CELL_VALUE_RANGE:
-			case PER_CELL_UNIQUE_VALUE:
-			case PER_CELL_PERCENTILE_VALUE:
-			{
-				QString sfName = GetDefaultFieldName(exportedFields[i]);
-				sfIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(sfName));
-				if (sfIndex >= 0)
-				{
-					ccLog::Warning(QString("[Rasterize] Scalar field '%1' already exists. It will be overwritten.").arg(sfName));
-				}
-				else
-				{
-					sfIndex = cloudGrid->addScalarField(qPrintable(sfName));
-				}
-			}
-			break;
-			default:
-				assert(false);
-				break;
+                case PER_CELL_VALUE:
+                case PER_CELL_COUNT:
+                case PER_CELL_MIN_VALUE:
+                case PER_CELL_MAX_VALUE:
+                case PER_CELL_AVG_VALUE:
+                case PER_CELL_MEDIAN_VALUE:
+                case PER_CELL_VALUE_STD_DEV:
+                case PER_CELL_VALUE_RANGE:
+                case PER_CELL_UNIQUE_VALUE:
+                case PER_CELL_PERCENTILE_VALUE:
+                {
+                    QString sfName = QString("Height ");
+                    sfName += GetDefaultFieldName(exportedFields[i]);
+                    sfIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(sfName));
+                    if (sfIndex >= 0)
+                    {
+                        ccLog::Warning(QString("[Rasterize] Scalar field '%1' already exists. It will be overwritten.").arg(sfName));
+                    }
+                    else
+                    {
+                        sfIndex = cloudGrid->addScalarField(qPrintable(sfName));
+                    }
+                }
+                break;
+                default:
+                    assert(false);
+                    break;
 			}
 			
 			if (sfIndex < 0)
@@ -1201,6 +1218,58 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 			assert(exportedSFs[i]);
 		}
 	}
+
+	//shall we generate additional scalar fields, SF data statistics?
+    if ( numberOfExportedSfStatisticsFields > 0 ) 
+    {
+	    ccPointCloud* pc = static_cast<ccPointCloud*>(inputCloud);
+		for (int k = 0; k < static_cast<int>(pc->getNumberOfScalarFields()); ++k)
+        {
+		for (size_t i = 0; i < exportedSfStatistics.size(); ++i)
+            {
+                int sfIndex = -1;
+                switch (exportedSfStatistics[i])
+                {
+                    case PER_CELL_VALUE:
+                    case PER_CELL_COUNT:
+                    case PER_CELL_MIN_VALUE:
+                    case PER_CELL_MAX_VALUE:
+                    case PER_CELL_AVG_VALUE:
+                    case PER_CELL_MEDIAN_VALUE:
+                    case PER_CELL_VALUE_STD_DEV:
+                    case PER_CELL_VALUE_RANGE:
+                    case PER_CELL_UNIQUE_VALUE:
+                    case PER_CELL_PERCENTILE_VALUE:
+                    {
+                        QString sfName = QString::fromUtf8(pc->getScalarFieldName(k));
+                        sfName += QString(" ") + GetDefaultFieldName(exportedSfStatistics[i]);
+                        sfIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(sfName));
+                        if (sfIndex >= 0)
+                        {
+                            ccLog::Warning(QString("[Rasterize] Scalar field '%1' already exists. It will be overwritten.").arg(sfName));
+                        }
+                        else
+                        {
+                            sfIndex = cloudGrid->addScalarField(qPrintable(sfName));
+                        }
+                    }
+                    break;
+                    default:
+                        assert(false);
+                        break;
+                }
+                
+                if (sfIndex < 0)
+                {
+                    ccLog::Warning("[Rasterize] Couldn't allocate scalar field(s)! Try to free some memory ...");
+                    break;
+                }
+                unsigned exportedSfIndex = numberOfExportedHeightStatisticsFields + (k*exportedSfStatistics.size()) + i;
+                exportedSFs[exportedSfIndex] = cloudGrid->getScalarField(sfIndex);
+                assert(exportedSFs[exportedSfIndex]);
+            }
+        }
+    }
 
 	if (resampleInputCloudXY)
 	{
@@ -1281,10 +1350,10 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				//fill the associated SFs
 				assert(!resampleInputCloudXY || inputCloud);
 				assert(!resampleInputCloudXY || nonEmptyCellIndex < inputCloud->size()); //we can't be here if we have a fully resampled cloud! (resampleInputCloudXY implies that inputCloud is defined)
-				assert(exportedSFs.size() == exportedFields.size());
+				assert(exportedSFs.size() >= exportedFields.size());
     
                 // TODO magnuan02 | Here we populate additional scalar fields based on the projected height 
-				for (size_t k = 0; k < exportedSFs.size(); ++k)
+				for (size_t k = 0; k < exportedFields.size(); ++k)
 				{
 					CCCoreLib::ScalarField* sf = exportedSFs[k];
 					if (!sf)
@@ -1378,8 +1447,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					}
 				}
 
-				assert(exportedSFs.size() == exportedFields.size());
-				for (size_t k = 0; k < exportedSFs.size(); ++k)
+				assert(exportedSFs.size() >= exportedFields.size());
+				for (size_t k = 0; k < exportedFields.size(); ++k)
 				{
 					CCCoreLib::ScalarField* sf = exportedSFs[k];
 					if (!sf)
