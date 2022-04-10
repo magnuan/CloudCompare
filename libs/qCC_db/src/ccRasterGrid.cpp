@@ -46,6 +46,8 @@ struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
 		insert(ccRasterGrid::PER_CELL_VALUE_STD_DEV, "Std. dev. height");
 		insert(ccRasterGrid::PER_CELL_VALUE_RANGE,   "Height range");
 		insert(ccRasterGrid::PER_CELL_MEDIAN_VALUE,  "Median height");
+		insert(ccRasterGrid::PER_CELL_UNIQUE_VALUE,   "Unique height values");
+		insert(ccRasterGrid::PER_CELL_PERCENTILE_VALUE,  "Percentile height value");
 	}
 };
 static DefaultFieldNames s_defaultFieldNames;
@@ -168,6 +170,11 @@ bool ccRasterGrid::init(unsigned w,
 	return true;
 }
 
+
+
+// ccRasterizeTool.cpp  : updateGrid
+// TODO magnuan04 | Here we calculate statistic value for each cell based on projected height 
+// TODO magnuan05 | Here we calculate statistic value for each cell based on SF values 
 bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								unsigned char Z,
 								ProjectionType projectionType,
@@ -334,6 +341,12 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		ccLog::Warning("[Rasterize] Not enough memory to process cells!");
 		return false;
 	}
+   
+    // Set up pointer to Scalar field containing std. dev. values, if inverse variance is being used
+    CCCoreLib::ScalarField* zStdDevSF;
+    if (zStdDevSfIndex>=0){
+        zStdDevSF = pc->getScalarField(zStdDevSfIndex);
+    }
 
 	//Now we can browse through all points belonging in each cell 
 	for (unsigned j = 0; j < height; ++j)
@@ -374,6 +387,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				auto cellPointHeightEnd = std::next(cellPointHeight.begin(), aCell.nbPoints);
 
 
+                // TODO magnuan04 | Here we calculate statistic value for each cell based on projected height 
 				//Compute standard statistics on height value
 				// Extract median value
 				if (aCell.nbPoints%2)
@@ -408,13 +422,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				{
 					assert(zStdDevSfIndex>=0);
 					//Calculate weighted average 
-					CCCoreLib::ScalarField* sf = pc->getScalarField(zStdDevSfIndex);
-					assert(sf);
 					// Read out inverse variance for all points in  current cell 
 					for (unsigned n = 0; n < aCell.nbPoints ;n++)
 					{
 						unsigned pointIndex = cellPointIndexedHeight[n].index;
-						auto stdDev = sf->getValue(pointIndex);
+						auto stdDev = zStdDevSF->getValue(pointIndex);
 						cellPointSF[n] = 1.f / (stdDev*stdDev);
 					}
 					auto cellPointSFEnd = std::next(cellPointSF.begin(), aCell.nbPoints);
@@ -514,17 +526,20 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				}
 				
 				//Handle scalar fields
+                // TODO magnuan05 | Here we calculate statistic value for each cell based on SF values 
 				if (interpolateSF)
 				{
 					assert(pc);
 					//absolute position of the cell (e.g. in the 2D SF grid(s))
 					int pos = cellPos.y * static_cast<int>(width) + cellPos.x;
 					assert(pos < static_cast<int>(gridTotalSize));
-					
+                    
+
 					for (size_t k = 0; k < scalarFields.size(); ++k)
 					{
 						assert(!scalarFields[k].empty());
 						CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
+					
 						assert(sf && pos < scalarFields[k].size());
                         //Special case for input std deviation input layer if in "inverse variance" projection mode
                         //Output layer should just be filed with the updated model standard deviation 
@@ -533,7 +548,45 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						    scalarFields[k][pos] = aCell.modelStdDevHeight;
                             continue;
                         }
-
+						
+#if 1
+                        double scalarFieldWeightedSum = 0.0;
+                        double scalarFieldWeightSum = 0.0;
+                        switch (sfInterpolation)
+						{
+							case PROJ_MINIMUM_VALUE:
+							case PROJ_MEDIAN_VALUE:
+							case PROJ_MAXIMUM_VALUE:
+                                // For Min, Max and Median projection, we pick the SF value coresponting to the "selected" height point
+                                scalarFields[k][pos] = sf->getValue(aCell.pointIndex);
+								break;
+							case PROJ_AVERAGE_VALUE:
+                                // For average, we do a simple average of unsorted SF-values in cell
+                                for (unsigned n = 0; n < aCell.nbPoints ;n++)
+                                {
+                                    unsigned pointIndex = cellPointIndexedHeight[n].index;
+                                    scalarFieldWeightedSum += sf->getValue(pointIndex);
+                                }
+                                scalarFields[k][pos] = scalarFieldWeightedSum/aCell.nbPoints;
+								break;
+				            case PROJ_INVERSE_VAR_VALUE:   
+                                // For inverse variance, we do a weighted average 1/var
+                                for (unsigned n = 0; n < aCell.nbPoints ;n++)
+                                {
+                                    unsigned pointIndex = cellPointIndexedHeight[n].index;
+                                    auto value = sf->getValue(pointIndex);
+                                    auto stdDev = zStdDevSF->getValue(pointIndex);
+                                    auto weight = 1.f / (stdDev*stdDev);
+                                    scalarFieldWeightedSum += weight*value;
+                                    scalarFieldWeightSum += weight;
+                                }
+                                scalarFields[k][pos] = scalarFieldWeightedSum/scalarFieldWeightSum;;
+								break;
+							default:
+								assert(false);
+								break;
+						}
+#else
 
 						// Set up vector of valid sf values for current cell 
 						unsigned validPoints = 0;
@@ -559,6 +612,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						{
 							case PROJ_MINIMUM_VALUE:
 								scalarFields[k][pos] = cellPointSF.front();
+                                scalarFields[k][pos] = sf->getValue(aCell.pointIndex);
 								break;
 							case PROJ_AVERAGE_VALUE:
 				            case PROJ_INVERSE_VAR_VALUE:   //TODO: We should probably use proper inverse variance calculation for SF interpolation as well, but for now we just do a simple average
@@ -580,6 +634,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								assert(false);
 								break;
 						}
+#endif
 					}
 				}
 			}
@@ -991,6 +1046,12 @@ void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
 	}
 }
 
+// ccRasterizeTool.cpp : generateCloud   and   updateGridAndDisplay 
+// ccRasterizeTool.cpp : convertGridToCloud
+// cc2.5DimEditor.cpp  : convertGridToCloud
+// TODO magnuan01 | Here we add additional scalar fields based on the projected height 
+// TODO magnuan02 | Here we populate additional scalar fields based on the projected height 
+// TODO magnuan03 | Here we add and populate additional scalar fields for each input scalar field
 ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>& exportedFields,
 											bool interpolateSF,
 											bool interpolateColors,
@@ -1092,7 +1153,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 		cloudGrid = new ccPointCloud("grid");
 	}
 	assert(cloudGrid);
-	
+
+    // TODO magnuan01 | Here we add additional scalar fields based on the projected height 
 	//shall we generate additional scalar fields?
 	std::vector<CCCoreLib::ScalarField*> exportedSFs;
 	if (!exportedFields.empty())
@@ -1222,6 +1284,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				assert(!resampleInputCloudXY || inputCloud);
 				assert(!resampleInputCloudXY || nonEmptyCellIndex < inputCloud->size()); //we can't be here if we have a fully resampled cloud! (resampleInputCloudXY implies that inputCloud is defined)
 				assert(exportedSFs.size() == exportedFields.size());
+    
+                // TODO magnuan02 | Here we populate additional scalar fields based on the projected height 
 				for (size_t k = 0; k < exportedSFs.size(); ++k)
 				{
 					CCCoreLib::ScalarField* sf = exportedSFs[k];
@@ -1372,6 +1436,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				ccScalarField* formerSf = static_cast<ccScalarField*>(pc->getScalarField(static_cast<int>(k)));
 				assert(formerSf);
 
+                
+                // TODO magnuan03 | Here we add and populate additional scalar fields to output cloud for each grid scalar field
 				//we try to create an equivalent SF on the output grid
 				int sfIdx = cloudGrid->addScalarField(formerSf->getName());
 				if (sfIdx < 0) //if we aren't lucky, the input cloud already had a SF with the same name
