@@ -253,11 +253,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	//we always handle the colors (if any)
 	hasColors = cloud->hasColors();
 
-	//Array of pointers, each coresponding to a point in the cloud
-	// cloud->getPoint(n)  coresponds to (pointRefList[n])
-	// The pointers are used to chain together points, bellonging to the same cell 
-	std::vector<void*> pointRefList;
-	try
+	//Allocate memory for the linked list, linking points to respective cells
+    try
 	{
 		pointRefList.resize(pointCount, nullptr);
 	}
@@ -1053,6 +1050,7 @@ void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
 // TODO magnuan02 | Here we populate additional scalar fields based on the projected height 
 // TODO magnuan03 | Here we add and populate additional scalar fields for each input scalar field
 ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>& exportedFields,
+                                            const std::vector<ExportableFields>& exportedSfStatistics,
 											bool interpolateSF,
 											bool interpolateColors,
 											bool resampleInputCloudXY,

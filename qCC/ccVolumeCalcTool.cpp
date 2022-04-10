@@ -355,9 +355,11 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 	{
 		//we only compute the default 'height' layer
 		std::vector<ccRasterGrid::ExportableFields> exportedFields;
+		std::vector<ccRasterGrid::ExportableFields> exportedSfStatistics;
 		exportedFields.push_back(ccRasterGrid::PER_CELL_VALUE);
 
 		rasterCloud = grid.convertToCloud(exportedFields,
+            exportedSfStatistics,
 			false,
 			false,
 			false,
@@ -400,8 +402,10 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 	{
 		//we only compute the default 'height' layer
 		std::vector<ccRasterGrid::ExportableFields> exportedFields;
+		std::vector<ccRasterGrid::ExportableFields> exportedSfStatistics;
 		exportedFields.push_back(ccRasterGrid::PER_CELL_VALUE);
 		rasterCloud = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
+                                                                exportedSfStatistics,
 																false,
 																false,
 																false,

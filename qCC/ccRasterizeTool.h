@@ -186,6 +186,7 @@ protected: //raster grid related stuff
 
 	//! Converts the grid to a cloud with scalar field(s)
 	ccPointCloud* convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
+										const std::vector<ccRasterGrid::ExportableFields>& exportedSfStatistics,
 										bool interpolateSF,
 										bool interpolateColors,
 										bool copyHillshadeSF,

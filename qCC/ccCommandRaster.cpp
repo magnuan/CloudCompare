@@ -360,6 +360,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		if (outputCloud || outputMesh)
 		{
 			std::vector<ccRasterGrid::ExportableFields> exportedFields;
+			std::vector<ccRasterGrid::ExportableFields> exportedSfStatistics;
 			try
 			{
 				//we always compute the default 'height' layer
@@ -372,6 +373,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 
 			ccPointCloud* rasterCloud = grid.convertToCloud(
 			                                exportedFields,
+			                                exportedSfStatistics,
 			                                true,
 			                                true,
 			                                resample,

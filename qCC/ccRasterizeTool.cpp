@@ -663,6 +663,7 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 }
 
 ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
+													const std::vector<ccRasterGrid::ExportableFields>& exportedSfStatistics,
 													bool interpolateSF,
 													bool interpolateColors,
 													bool copyHillshadeSF,
@@ -683,6 +684,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 
 	//call parent method
 	ccPointCloud* cloudGrid = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
+																		exportedSfStatistics,
 																		interpolateSF,
 																		interpolateColors,
 																		/*resampleInputCloudXY=*/resampleOriginalCloud(),
@@ -771,6 +773,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 	{
 		//convert grid to point cloud
 		std::vector<ccRasterGrid::ExportableFields> exportedFields;
+		std::vector<ccRasterGrid::ExportableFields> exportedSfStatistics;
 		try
 		{
 			//we always compute the default 'height' layer
@@ -778,6 +781,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 			//but we may also have to compute the 'original SF(s)' layer(s)
 			QString activeLayerName = m_UI->activeLayerComboBox->currentText();
 			m_rasterCloud = convertGridToCloud(	exportedFields,
+												exportedSfStatistics,
 												/*interpolateSF=*/interpolateSF,
 												/*interpolateColors=*/activeLayerIsRGB,
 												/*copyHillshadeSF=*/false,
@@ -935,7 +939,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 		return nullptr;
 	}
 
-	//look for fields to be exported
+	//look for statistics fields (min,max,median,etc) to be exported for height data only
 	std::vector<ccRasterGrid::ExportableFields> exportedFields;
 	try
 	{
@@ -960,12 +964,40 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 		ccLog::Error("Not enough memory!");
 		return nullptr;
 	}
+	
+	//look for statistics fields (min,max,median,etc) fields to be exported for all Scalar Fields
+	std::vector<ccRasterGrid::ExportableFields> exportedSfStatistics;
+	try
+	{
+		exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_VALUE);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_COUNT))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_COUNT);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_MIN_VALUE))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_MIN_VALUE);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_MAX_VALUE))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_MAX_VALUE);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_AVG_VALUE))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_AVG_VALUE);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_VALUE_STD_DEV))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_VALUE_STD_DEV);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_VALUE_RANGE))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_VALUE_RANGE);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_MEDIAN_VALUE))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_MEDIAN_VALUE);
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("Not enough memory!");
+		return nullptr;
+	}
+
+
 	QString activeLayerName = m_UI->activeLayerComboBox->currentText();
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
 	//bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
 
-    //TODO magnuan, replace interpolateSF with exportedSFStatistics
 	ccPointCloud* rasterCloud = convertGridToCloud(	exportedFields,
+													exportedSfStatistics,
 													/*interpolateSF=*/(getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF,
 													/*interpolateColors=*/true,
 													/*copyHillshadeSF=*/true,

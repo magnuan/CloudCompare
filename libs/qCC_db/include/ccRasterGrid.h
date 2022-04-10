@@ -144,6 +144,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 
 	//! Converts the grid to a cloud with scalar field(s)
 	ccPointCloud* convertToCloud(	const std::vector<ExportableFields>& exportedFields,
+                                    const std::vector<ExportableFields>& exportedSfStatistics,
 									bool interpolateSF,
 									bool interpolateColors,
 									bool resampleInputCloudXY,
@@ -234,6 +235,11 @@ struct QCC_DB_LIB_API ccRasterGrid
 
 	//! Associated scalar fields
 	std::vector<SF> scalarFields;
+	
+    //! Array of pointers, each coresponding to a point in the cloud
+	// cloud->getPoint(n)  coresponds to (pointRefList[n])
+	// The pointers are used to chain together points, bellonging to the same cell 
+	std::vector<void*> pointRefList;
 
 	//! Number of columns
 	unsigned width;

@@ -83,6 +83,7 @@ protected: //raster grid related stuff
 
 	//! Shortcut to ccRasterGrid::convertToCloud
 	ccPointCloud* convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
+										const std::vector<ccRasterGrid::ExportableFields>& exportedSfStatistics,
 										bool interpolateSF,
 										bool interpolateColors,
 										bool resampleInputCloudXY,
