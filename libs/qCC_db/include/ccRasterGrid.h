@@ -260,6 +260,8 @@ struct QCC_DB_LIB_API ccRasterGrid
 	unsigned nonEmptyCellCount;
 	//! Number of VALID cells
 	unsigned validCellCount;
+	//! Max number of points in any cell
+    unsigned maxNbPoints;
 
 	//! Whether the (average) colors are available or not
 	bool hasColors;
