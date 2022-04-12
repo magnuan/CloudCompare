@@ -261,6 +261,8 @@ bool ccRasterizeTool::exportSFStatistics(ccRasterGrid::ExportableFields field) c
 	{
 	case ccRasterGrid::PER_CELL_COUNT:
 		return m_UI->generateSFStatisticsPopulationCheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_PROJECTED_VALUE:
+		return m_UI->generateSFStatisticsProjectedCheckBox->isChecked();
 	case ccRasterGrid::PER_CELL_MIN_VALUE:
 		return m_UI->generateSFStatisticsMinCheckBox->isChecked();
 	case ccRasterGrid::PER_CELL_MAX_VALUE:
@@ -969,7 +971,8 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	std::vector<ccRasterGrid::ExportableFields> exportedSfStatistics;
 	try
 	{
-		exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_VALUE);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_PROJECTED_VALUE))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_PROJECTED_VALUE);
 		if (exportSFStatistics(ccRasterGrid::PER_CELL_COUNT))
 			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_COUNT);
 		if (exportSFStatistics(ccRasterGrid::PER_CELL_MIN_VALUE))
