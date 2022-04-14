@@ -48,7 +48,6 @@ struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
 		insert(ccRasterGrid::PER_CELL_MEDIAN_VALUE,  "median");
 		insert(ccRasterGrid::PER_CELL_UNIQUE_VALUE,   "unique");
 		insert(ccRasterGrid::PER_CELL_PERCENTILE_VALUE,  "percentile");
-		insert(ccRasterGrid::PER_CELL_PROJECTED_VALUE,         "projected");
 	}
 };
 static DefaultFieldNames s_defaultFieldNames;
@@ -173,9 +172,6 @@ bool ccRasterGrid::init(unsigned w,
 
 
 
-// ccRasterizeTool.cpp  : updateGrid
-// TODO magnuan04 | Here we calculate statistic value for each cell based on projected height 
-// TODO magnuan05 | Here we calculate statistic value for each cell based on SF values 
 bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								unsigned char Z,
 								ProjectionType projectionType,
@@ -385,7 +381,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				auto cellPointHeightEnd = std::next(cellPointHeight.begin(), aCell.nbPoints);
 
 
-                // TODO magnuan04 | Here we calculate statistic value for each cell based on projected height 
 				//Compute standard statistics on height value
 				// Extract median value
 				if (aCell.nbPoints%2)
@@ -524,7 +519,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				}
 				
 				//Handle scalar fields
-                // TODO magnuan05 | Here we calculate statistic value for each cell based on SF values 
 				if (interpolateSF)
 				{
 					assert(pc);
@@ -994,14 +988,6 @@ void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
 	}
 }
 
-// ccRasterizeTool.cpp : generateCloud   and   updateGridAndDisplay 
-// ccRasterizeTool.cpp : convertGridToCloud
-// cc2.5DimEditor.cpp  : convertGridToCloud
-// TODO magnuan01 | Here we add additional scalar fields based on the projected height 
-// TODO magnuan01b | Here we add additional scalar fields based on scalar field statistics
-// TODO magnuan02 | Here we populate additional scalar fields based on the projected height 
-// TODO magnuan02b | Here we populate additional scalar fields with scalar field statistics 
-// TODO magnuan03 | Here we add and populate additional scalar fields for each input scalar field
 ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>& exportedFields,
                                             const std::vector<ExportableFields>& exportedSfStatistics,
 											bool interpolateSF,
@@ -1106,7 +1092,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	}
 	assert(cloudGrid);
 
-    // TODO magnuan01 | Here we add additional scalar fields based on the projected height 
 	//shall we generate additional scalar fields, height data statistics?
     unsigned numberOfExportedHeightStatisticsFields = exportedFields.size();
     unsigned numberOfExportedSfStatisticsFields;
@@ -1144,7 +1129,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
                 case PER_CELL_VALUE_RANGE:
                 case PER_CELL_UNIQUE_VALUE:
                 case PER_CELL_PERCENTILE_VALUE:
-                case PER_CELL_PROJECTED_VALUE:
                 {
                     QString sfName = GetDefaultFieldName(exportedFields[i]);
                     sfIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(sfName));
@@ -1175,7 +1159,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	}
 
     
-    // TODO magnuan01b | Here we add additional scalar fields based on scalar field statistics
 	//shall we generate additional scalar fields, SF data statistics?
     if ( numberOfExportedSfStatisticsFields > 0 ) 
     {
@@ -1197,10 +1180,13 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
                     case PER_CELL_VALUE_RANGE:
                     case PER_CELL_UNIQUE_VALUE:
                     case PER_CELL_PERCENTILE_VALUE:
-                    case PER_CELL_PROJECTED_VALUE:
                     {
                         QString sfName = QString::fromUtf8(pc->getScalarFieldName(k));
                         sfName += QString(" ") + GetDefaultFieldName(exportedSfStatistics[i]);
+						if ( exportedSfStatistics[i] == PER_CELL_PERCENTILE_VALUE )
+						{
+							sfName += QString(" P%1").arg(percentileValue);
+						}
                         sfIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(sfName));
                         if (sfIndex >= 0)
                         {
@@ -1328,7 +1314,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				assert(!resampleInputCloudXY || nonEmptyCellIndex < inputCloud->size()); //we can't be here if we have a fully resampled cloud! (resampleInputCloudXY implies that inputCloud is defined)
 				assert(exportedSFs.size() >= exportedFields.size());
     
-                // TODO magnuan02 | Here we populate additional scalar fields based on the projected height 
 				for (size_t k = 0; k < exportedFields.size(); ++k)
 				{
 					CCCoreLib::ScalarField* sf = exportedSFs[k];
@@ -1341,7 +1326,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					switch (exportedFields[k])
 					{
 					case PER_CELL_VALUE:
-					case PER_CELL_PROJECTED_VALUE:
 						sVal = static_cast<ScalarType>(aCell->h);
 						break;
 					case PER_CELL_COUNT:
@@ -1400,7 +1384,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					}
 				}
                 
-                // TODO magnuan02b | Here we populate additional scalar fields with scalar field statistics 
                 
                 //Assemble a list of all pointindexes in this cell
                 //  Start with first point in cell, and browse through every point using the linked ref list, and collect point indexes
@@ -1450,9 +1433,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
                             ScalarType sVal = CCCoreLib::NAN_VALUE;
                             switch (exportedSfStatistics[i])
                             {
-                                case PER_CELL_PROJECTED_VALUE:
-                                    sVal = static_cast<ScalarType>(inputScalarField->getValue(aCell->pointIndex));
-                                    break;
                                 case PER_CELL_COUNT:
                                     sVal = static_cast<ScalarType>(aCell->nbPoints);
                                     break;
@@ -1604,7 +1584,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				assert(formerSf);
 
                 
-                // TODO magnuan03 | Here we add and populate additional scalar fields to output cloud for each grid scalar field
 				//we try to create an equivalent SF on the output grid
 				int sfIdx = cloudGrid->addScalarField(formerSf->getName());
 				if (sfIdx < 0) //if we aren't lucky, the input cloud already had a SF with the same name

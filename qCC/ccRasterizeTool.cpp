@@ -261,8 +261,6 @@ bool ccRasterizeTool::exportSFStatistics(ccRasterGrid::ExportableFields field) c
 	{
 	case ccRasterGrid::PER_CELL_COUNT:
 		return m_UI->generateSFStatisticsPopulationCheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_PROJECTED_VALUE:
-		return m_UI->generateSFStatisticsProjectedCheckBox->isChecked();
 	case ccRasterGrid::PER_CELL_MIN_VALUE:
 		return m_UI->generateSFStatisticsMinCheckBox->isChecked();
 	case ccRasterGrid::PER_CELL_MAX_VALUE:
@@ -528,7 +526,6 @@ void ccRasterizeTool::loadSettings()
 	bool projectContoursOnAlt	= settings.value("projectContoursOnAlt",  m_UI->projectContoursOnAltCheckBox->isChecked()).toBool();
 	
 	//SF Statistics checkboxes
-	bool generateSFStatisticsProjected			= settings.value("generateSFStatisticsProjected",	   	m_UI->generateSFStatisticsProjectedCheckBox->isChecked()).toBool();
 	bool generateSFStatisticsPopulation			= settings.value("generateSFStatisticsPopulation",	   	m_UI->generateSFStatisticsPopulationCheckBox->isChecked()).toBool();
 	bool generateSFStatisticsMin				= settings.value("generateSFStatisticsMin",	   			m_UI->generateSFStatisticsMinCheckBox->isChecked()).toBool();
 	bool generateSFStatisticsMax				= settings.value("generateSFStatisticsMax",	   			m_UI->generateSFStatisticsMaxCheckBox->isChecked()).toBool();
@@ -564,7 +561,6 @@ void ccRasterizeTool::loadSettings()
 	m_UI->projectContoursOnAltCheckBox->setChecked(projectContoursOnAlt);
 
 	//SF Statistics checkboxes
-	m_UI->generateSFStatisticsProjectedCheckBox->setChecked(  generateSFStatisticsProjected		);
 	m_UI->generateSFStatisticsPopulationCheckBox->setChecked( generateSFStatisticsPopulation	);
     m_UI->generateSFStatisticsMinCheckBox->setChecked(		  generateSFStatisticsMin	     	);
     m_UI->generateSFStatisticsMaxCheckBox->setChecked(		  generateSFStatisticsMax	     	);
@@ -636,7 +632,6 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("projectContoursOnAlt", m_UI->projectContoursOnAltCheckBox->isChecked());
 
 	//SF Statistics checkboxes
-	settings.setValue("generateSFStatisticsProjected",	   	m_UI->generateSFStatisticsProjectedCheckBox->isChecked());
 	settings.setValue("generateSFStatisticsPopulation",	   	m_UI->generateSFStatisticsPopulationCheckBox->isChecked());
 	settings.setValue("generateSFStatisticsMin",	   			m_UI->generateSFStatisticsMinCheckBox->isChecked());
 	settings.setValue("generateSFStatisticsMax",	   			m_UI->generateSFStatisticsMaxCheckBox->isChecked());
@@ -979,8 +974,6 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	std::vector<ccRasterGrid::ExportableFields> exportedSfStatistics;
 	try
 	{
-		if (exportSFStatistics(ccRasterGrid::PER_CELL_PROJECTED_VALUE))
-			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_PROJECTED_VALUE);
 		if (exportSFStatistics(ccRasterGrid::PER_CELL_COUNT))
 			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_COUNT);
 		if (exportSFStatistics(ccRasterGrid::PER_CELL_MIN_VALUE))
