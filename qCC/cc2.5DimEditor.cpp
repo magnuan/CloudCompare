@@ -216,6 +216,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<ccRaster
 														ccGenericPointCloud* inputCloud,
 														bool fillEmptyCells,
 														double emptyCellsHeight,
+                                            			double percentileValue,
 														bool exportToOriginalCS) const
 {
 	//projection dimension
@@ -237,6 +238,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<ccRaster
 									box,
 									fillEmptyCells,
 									emptyCellsHeight,
+									percentileValue,
 									exportToOriginalCS);
 }
 

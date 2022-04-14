@@ -155,6 +155,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 									const ccBBox& box,
 									bool fillEmptyCells,
 									double emptyCellsHeight,
+                                    double percentileValue,
 									bool exportToOriginalCS) const;
 
 	//! Types of projection

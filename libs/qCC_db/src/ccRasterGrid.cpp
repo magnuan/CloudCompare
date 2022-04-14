@@ -1013,6 +1013,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 											const ccBBox& box,
 											bool fillEmptyCells,
 											double emptyCellsHeight,
+                                            double percentileValue,
 											bool exportToOriginalCS) const
 {
 	if (Z > 2 || !box.isValid())
@@ -1478,28 +1479,37 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
                                     }
                                     break;
                                 case PER_CELL_PERCENTILE_VALUE:
-                                    //TODO magnuan fix
-                                    sVal = static_cast<ScalarType>(cellPointVal[aCell->nbPoints/2]);
+                                    {
+                                        auto ix = static_cast<unsigned>(percentileValue * static_cast<double>(aCell->nbPoints)/100.);
+                                        assert(ix<aCell->nbPoints);
+                                        sVal = static_cast<ScalarType>(cellPointVal[ix]);
+                                    }
                                     break;
                                 case PER_CELL_UNIQUE_VALUE:
-                                    //TODO magnuan fix
-                                    sVal = static_cast<ScalarType>(cellPointVal[aCell->nbPoints/2]);
+                                    {
+                                        sVal = 1;
+                                        for (unsigned n = 1; n < aCell->nbPoints ;n++)
+                                        {
+                                            if ( cellPointVal[n-1] != cellPointVal[n] )
+                                            {
+                                                sVal++;
+                                            }
+                                        }
+                                    }
                                     break;
                                 case PER_CELL_VALUE_STD_DEV:
-                                    sVal = 0.0;
-                                    break;
-                                    /*
-                                    TODO magnuan fix
-                                    double cellMean = std::accumulate(cellPointVal.begin(), cellPointValEnd, 0.0) / aCell->nbPoints;
-                                    double cellVariance = 0.0;
-                                    for (unsigned n = 0; n < aCell->nbPoints ;n++)
                                     {
-                                        auto devFromMean = cellPointVal[n] - cellMean;
-                                        cellVariance += devFromMean * devFromMean;
+                                        double cellMean = std::accumulate(cellPointVal.begin(), cellPointValEnd, 0.0) / aCell->nbPoints;
+                                        double cellVariance = 0.0;
+                                        for (unsigned n = 0; n < aCell->nbPoints ;n++)
+                                        {
+                                            cellVariance += cellPointVal[n] * cellPointVal[n];
+                                        }
+                                        cellVariance /= aCell->nbPoints;
+                                        sVal = cellVariance - ( cellMean * cellMean) ;
                                     }
-                                    cellVariance /= aCell->nbPoints;
-                                    sVal = static_cast<ScalarType>(std::sqrt(cellVariance));
-                                    break;*/
+                                    sVal = static_cast<ScalarType>(std::sqrt(sVal));
+                                    break;
                                 default:
                                     assert(false);
                                     break;

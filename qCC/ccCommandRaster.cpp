@@ -383,6 +383,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			                                gridBBox,
 			                                emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT,
 			                                customHeight,
+                                            0,
 			                                true
 			                                );
 

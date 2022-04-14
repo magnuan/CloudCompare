@@ -450,6 +450,11 @@ double ccRasterizeTool::getCustomHeightForEmptyCells() const
 	return m_UI->emptyValueDoubleSpinBox->value();
 }
 
+double ccRasterizeTool::getSFStatisticsPercentileValue() const
+{
+	return m_UI->generateSFStatisticsPercentileDoubleSpinBox->value();
+}
+
 ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 {
 	switch (m_UI->heightProjectionComboBox->currentIndex())
@@ -670,6 +675,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 													bool interpolateColors,
 													bool copyHillshadeSF,
 													const QString& activeSFName,
+                                            		double percentileValue,
 													bool exportToOriginalCS) const
 {
 	if (!m_cloud || !m_grid.isValid())
@@ -694,6 +700,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 																		/*inputCloud=*/m_cloud,
 																		/*fillEmptyCells=*/fillEmptyCellsStrategy != ccRasterGrid::LEAVE_EMPTY,
 																		emptyCellsHeight,
+                                            							percentileValue,
 																		exportToOriginalCS);
 
 	//success?
@@ -788,6 +795,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 												/*interpolateColors=*/activeLayerIsRGB,
 												/*copyHillshadeSF=*/false,
 												activeLayerName,
+												getSFStatisticsPercentileValue(),
 												false);
 		}
 		catch (const std::bad_alloc&)
@@ -987,6 +995,10 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_VALUE_RANGE);
 		if (exportSFStatistics(ccRasterGrid::PER_CELL_MEDIAN_VALUE))
 			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_MEDIAN_VALUE);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_UNIQUE_VALUE))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_UNIQUE_VALUE);
+		if (exportSFStatistics(ccRasterGrid::PER_CELL_PERCENTILE_VALUE))
+			exportedSfStatistics.push_back(ccRasterGrid::PER_CELL_PERCENTILE_VALUE);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -1005,6 +1017,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 													/*interpolateColors=*/true,
 													/*copyHillshadeSF=*/true,
 													activeLayerName,
+													getSFStatisticsPercentileValue(),
 													true);
 
 	if (rasterCloud && autoExport)

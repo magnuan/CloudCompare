@@ -150,6 +150,9 @@ private: //standard methods
 	//! Returns user defined height for empty cells
 	double getCustomHeightForEmptyCells() const;
 
+    //! Returns user defined percentile value for SF statistics export
+    double getSFStatisticsPercentileValue() const;
+
 	//! Returns strategy for empty cell filling (extended version)
 	ccRasterGrid::EmptyCellFillOption getFillEmptyCellsStrategyExt(	double& emptyCellsHeight,
 																	double& minHeight,
@@ -191,6 +194,7 @@ protected: //raster grid related stuff
 										bool interpolateColors,
 										bool copyHillshadeSF,
 										const QString& activeSFName,
+                                        double percentileValue,
 										bool exportToOriginalCS) const;
 
 private: //members

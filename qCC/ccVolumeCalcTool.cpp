@@ -369,6 +369,7 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 			gridBox,
 			false,
 			std::numeric_limits<double>::quiet_NaN(),
+            0,
 			exportToOriginalCS);
 
 		if (rasterCloud && rasterCloud->hasScalarFields())
@@ -413,6 +414,7 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 																nullptr,
 																false,
 																std::numeric_limits<double>::quiet_NaN(),
+                                                                0.,
 																exportToOriginalCS);
 
 		if (rasterCloud)
