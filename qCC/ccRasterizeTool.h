@@ -194,7 +194,7 @@ protected: //raster grid related stuff
 										bool interpolateColors,
 										bool copyHillshadeSF,
 										const QString& activeSFName,
-                                        double percentileValue,
+										double percentileValue,
 										bool exportToOriginalCS) const;
 
 private: //members

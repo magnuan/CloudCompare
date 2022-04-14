@@ -675,7 +675,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 													bool interpolateColors,
 													bool copyHillshadeSF,
 													const QString& activeSFName,
-                                            		double percentileValue,
+													double percentileValue,
 													bool exportToOriginalCS) const
 {
 	if (!m_cloud || !m_grid.isValid())

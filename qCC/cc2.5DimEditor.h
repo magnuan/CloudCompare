@@ -91,7 +91,7 @@ protected: //raster grid related stuff
 										ccGenericPointCloud* inputCloud,
 										bool fillEmptyCells,
 										double emptyCellsHeight,
-                                        double percentileValue,
+										double percentileValue,
 										bool exportToOriginalCS) const;
 
 protected: //members

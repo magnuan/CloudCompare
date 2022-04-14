@@ -1013,7 +1013,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 											const ccBBox& box,
 											bool fillEmptyCells,
 											double emptyCellsHeight,
-                                            double percentileValue,
+											double percentileValue,
 											bool exportToOriginalCS) const
 {
 	if (Z > 2 || !box.isValid())
