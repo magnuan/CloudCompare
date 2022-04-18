@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "../include/ccAsprsModel.h"
+#include <assert.h>
 
 //QT
 #include <QSettings>
