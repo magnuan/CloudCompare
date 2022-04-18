@@ -696,6 +696,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 																		/*fillEmptyCells=*/fillEmptyCellsStrategy != ccRasterGrid::LEAVE_EMPTY,
 																		emptyCellsHeight,
                                             							percentileValue,
+																		nullptr,
 																		exportToOriginalCS);
 
 	//success?

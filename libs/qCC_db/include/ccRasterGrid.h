@@ -155,6 +155,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 									bool fillEmptyCells,
 									double emptyCellsHeight,
 									double percentileValue,
+									ccProgressDialog* progressDialog/*=nullptr*/,
 									bool exportToOriginalCS) const;
 
 	//! Types of projection

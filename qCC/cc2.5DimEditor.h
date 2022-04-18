@@ -92,6 +92,7 @@ protected: //raster grid related stuff
 										bool fillEmptyCells,
 										double emptyCellsHeight,
 										double percentileValue,
+										ccProgressDialog* progressDialog/*=nullptr*/,
 										bool exportToOriginalCS) const;
 
 protected: //members

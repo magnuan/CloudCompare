@@ -1000,6 +1000,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 											bool fillEmptyCells,
 											double emptyCellsHeight,
 											double percentileValue,
+											ccProgressDialog* progressDialog/*=nullptr*/,
 											bool exportToOriginalCS) const
 {
 	if (Z > 2 || !box.isValid())
@@ -1110,6 +1111,17 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
     {
 		exportedSFs.resize(numberOfExportedStatisticsFields, nullptr);
     }
+	
+	if (progressDialog)
+	{
+		progressDialog->setMethodTitle(QObject::tr("Cloud export"));
+		//progressDialog->setInfo(QObject::tr("Points: %L1\nCells: %L2 x %L3").arg( pointCount ).arg(width).arg(height));
+		progressDialog->start();
+		progressDialog->show();
+		QCoreApplication::processEvents();
+	}
+	CCCoreLib::NormalizedProgress nProgress(progressDialog, numberOfExportedStatisticsFields);
+
 
 	if (!exportedFields.empty())
 	{
@@ -1155,6 +1167,12 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 
 			exportedSFs[i] = cloudGrid->getScalarField(sfIndex);
 			assert(exportedSFs[i]);
+			
+			if (!nProgress.oneStep())
+			{
+				//process cancelled by the user
+				return false;
+			}
 		}
 	}
 
@@ -1211,6 +1229,12 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
                 unsigned exportedSfIndex = numberOfExportedHeightStatisticsFields + (k*exportedSfStatistics.size()) + i;
                 exportedSFs[exportedSfIndex] = cloudGrid->getScalarField(sfIndex);
                 assert(exportedSFs[exportedSfIndex]);
+			
+				if (!nProgress.oneStep())
+				{
+					//process cancelled by the user
+					return false;
+				}
             }
         }
     }

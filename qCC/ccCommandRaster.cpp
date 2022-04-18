@@ -384,6 +384,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			                                emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT,
 			                                customHeight,
                                             0,
+											nullptr,
 			                                true
 			                                );
 
