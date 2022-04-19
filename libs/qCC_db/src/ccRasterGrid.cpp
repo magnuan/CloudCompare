@@ -1115,7 +1115,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	if (progressDialog)
 	{
 		progressDialog->setMethodTitle(QObject::tr("Cloud export"));
-		//progressDialog->setInfo(QObject::tr("Points: %L1\nCells: %L2 x %L3").arg( pointCount ).arg(width).arg(height));
+		progressDialog->setInfo(QObject::tr("Exporting %1 fields").arg( numberOfExportedStatisticsFields ));
 		progressDialog->start();
 		progressDialog->show();
 		QCoreApplication::processEvents();
@@ -1171,7 +1171,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 			if (!nProgress.oneStep())
 			{
 				//process cancelled by the user
-				return false;
+				ccLog::Warning("[Rasterize] Cancelled by the user!");
+				delete cloudGrid;
+				return nullptr;
 			}
 		}
 	}
@@ -1233,7 +1235,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				if (!nProgress.oneStep())
 				{
 					//process cancelled by the user
-					return false;
+					ccLog::Warning("[Rasterize] Cancelled by the user!");
+					delete cloudGrid;
+					return nullptr;
 				}
             }
         }

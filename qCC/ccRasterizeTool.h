@@ -72,13 +72,13 @@ public: //raster export
 private:
 
 	//! Exports the grid as a cloud
-	ccPointCloud* generateCloud(bool autoExport = true) const;
+	ccPointCloud* generateCloud(bool autoExport = true);
 
 	//! Exports the grid as a raster
 	void generateRaster() const;
 
 	//! Exports the grid as a mesh
-	void generateMesh() const;
+	void generateMesh();
 
 	//! Exports the (already generated) contour lines
 	void exportContourLines();
@@ -195,6 +195,7 @@ protected: //raster grid related stuff
 										bool copyHillshadeSF,
 										const QString& activeSFName,
 										double percentileValue,
+										ccProgressDialog* progressDialog,
 										bool exportToOriginalCS) const;
 
 private: //members

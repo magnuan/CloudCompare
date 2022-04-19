@@ -671,6 +671,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 													bool copyHillshadeSF,
 													const QString& activeSFName,
 													double percentileValue,
+													ccProgressDialog* progressDialog,
 													bool exportToOriginalCS) const
 {
 	if (!m_cloud || !m_grid.isValid())
@@ -696,7 +697,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 																		/*fillEmptyCells=*/fillEmptyCellsStrategy != ccRasterGrid::LEAVE_EMPTY,
 																		emptyCellsHeight,
                                             							percentileValue,
-																		nullptr,
+																		progressDialog,
 																		exportToOriginalCS);
 
 	//success?
@@ -792,6 +793,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 												/*copyHillshadeSF=*/false,
 												activeLayerName,
 												getSFStatisticsPercentileValue(),
+                                                nullptr,
 												false);
 		}
 		catch (const std::bad_alloc&)
@@ -938,7 +940,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	return true;
 }
 
-ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
+ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/)
 {
 	if (!m_cloud || !m_grid.isValid())
 	{
@@ -1005,6 +1007,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
 	//bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
 
+	ccProgressDialog pDlg(true, this);
 	ccPointCloud* rasterCloud = convertGridToCloud(	exportedFields,
 													exportedSfStatistics,
 													/*interpolateSF=*/(getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF,
@@ -1012,6 +1015,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 													/*copyHillshadeSF=*/true,
 													activeLayerName,
 													getSFStatisticsPercentileValue(),
+                                                    &pDlg,
 													true);
 
 	if (rasterCloud && autoExport)
@@ -1044,7 +1048,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	return rasterCloud;
 }
 
-void ccRasterizeTool::generateMesh() const
+void ccRasterizeTool::generateMesh()
 {
 	ccPointCloud* rasterCloud = generateCloud(false);
 	if (rasterCloud)
