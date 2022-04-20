@@ -135,6 +135,12 @@ jobs:
         if: matrix.config.os == 'windows-latest'
         run: cmake --install build
 
+      - name: Archive binary output
+        uses: actions/upload-artifact@v2
+        with:
+          name: wbms_georef_windows_binary
+          path: build/qCC/deployqt/CloudCompare.exe
+
   ubuntu-build:
     name: Ubuntu ${{ matrix.compiler }} SCALAR_DOUBLE=${{ matrix.scalar_double }}
     runs-on: ubuntu-20.04
